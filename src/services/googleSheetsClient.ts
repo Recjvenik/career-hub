@@ -1,7 +1,7 @@
 import { Course, Project, Job } from '../types';
 
-// Default to user spreadsheet ID or VITE_GOOGLE_SHEETS_ID env variable
-const SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SHEETS_ID || '1EvDYHt1liagyhlhiSVMl_E80akqfzbl0_DasGStDPnk';
+// Read Spreadsheet ID strictly from environment variable to prevent secret scanning build blocks
+const SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SHEETS_ID || '';
 
 function parseCsv(csvText: string): string[][] {
   const lines = csvText.split(/\r?\n/);
