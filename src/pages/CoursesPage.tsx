@@ -9,8 +9,14 @@ import { ErrorState } from '../components/common/ErrorState';
 import { CardSkeleton } from '../components/common/LoadingSkeleton';
 import { GraduationCap } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useSEO } from '../hooks/useSEO';
 
 export const CoursesPage: React.FC = () => {
+  useSEO({
+    title: 'Upskilling Courses',
+    description: 'Explore industry-aligned training programs to build your job-ready foundation.'
+  });
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const categoryParam = searchParams.get('category') || 'All';

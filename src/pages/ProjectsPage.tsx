@@ -9,8 +9,14 @@ import { ErrorState } from '../components/common/ErrorState';
 import { CardSkeleton } from '../components/common/LoadingSkeleton';
 import { Layers } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useSEO } from '../hooks/useSEO';
 
 export const ProjectsPage: React.FC = () => {
+  useSEO({
+    title: 'Academic Projects',
+    description: 'Browse top-tier minor and major engineering projects for your academic curriculum.'
+  });
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const branchParam = searchParams.get('branch') || 'All';

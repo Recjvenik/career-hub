@@ -12,8 +12,14 @@ import { CourseCard } from '../components/courses/CourseCard';
 import { DashboardSkeleton } from '../components/common/LoadingSkeleton';
 import { calculateProfileCompletion, formatCurrency } from '../utils/formatters';
 import { Layers, Briefcase, User, ArrowRight, Sparkles, Clock, GraduationCap, BookOpen, CheckCircle2 } from 'lucide-react';
+import { useSEO } from '../hooks/useSEO';
 
 export const DashboardPage: React.FC = () => {
+  useSEO({
+    title: 'Student Dashboard',
+    description: 'Track your career journey, view enrolled courses, and manage booked projects.'
+  });
+
   const navigate = useNavigate();
   const { student, user } = useAuth();
   const [recommendedProjects, setRecommendedProjects] = useState<Project[]>([]);

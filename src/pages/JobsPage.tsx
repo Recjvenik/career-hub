@@ -8,8 +8,15 @@ import { EmptyState } from '../components/common/EmptyState';
 import { ErrorState } from '../components/common/ErrorState';
 import { CardSkeleton } from '../components/common/LoadingSkeleton';
 import { Briefcase } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { useSEO } from '../hooks/useSEO';
 
 export const JobsPage: React.FC = () => {
+  useSEO({
+    title: 'Jobs & Internships',
+    description: 'Explore active recruitment drives, entry-level developer roles, and specialized technical internships.'
+  });
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const branchParam = searchParams.get('branch') || 'All';
