@@ -8,6 +8,7 @@ import { EmptyState } from '../components/common/EmptyState';
 import { ErrorState } from '../components/common/ErrorState';
 import { CardSkeleton } from '../components/common/LoadingSkeleton';
 import { Layers } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 export const ProjectsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,8 +18,10 @@ export const ProjectsPage: React.FC = () => {
   const searchParam = searchParams.get('search') || '';
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [studentBookings, setStudentBookings] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
+  const { student } = useAuth();
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -30,6 +33,11 @@ export const ProjectsPage: React.FC = () => {
         search: searchParam,
       });
       setProjects(data);
+
+      if (student?.student_id) {
+        const bookings = await ApiService.getStudentBookings(student.student_id);
+        setStudentBookings(bookings.map(b => b.project_id));
+      }
     } catch (err) {
       console.error('Error fetching projects:', err);
       setError(true);
@@ -40,7 +48,7 @@ export const ProjectsPage: React.FC = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, [branchParam, typeParam, searchParam]);
+  }, [branchParam, typeParam, searchParam, student?.student_id]);
 
   const updateFilters = (newBranch?: string, newType?: string, newSearch?: string) => {
     const params = new URLSearchParams(searchParams);
@@ -114,7 +122,11 @@ export const ProjectsPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <ProjectCard key={project.project_id} project={project} />
+            <ProjectCard 
+              key={project.project_id} 
+              project={project} 
+              isBooked={studentBookings.includes(project.project_id)} 
+            />
           ))}
         </div>
       )}

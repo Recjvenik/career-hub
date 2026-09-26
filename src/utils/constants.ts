@@ -1,4 +1,4 @@
-export const APP_NAME = 'CareerPath';
+export const APP_NAME = 'GoTechPlace';
 export const APP_TAGLINE = 'Empowering student projects, practical skills, and career opportunities.';
 
 export const BRANCHES = [

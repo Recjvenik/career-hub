@@ -8,6 +8,7 @@ import { EmptyState } from '../components/common/EmptyState';
 import { ErrorState } from '../components/common/ErrorState';
 import { CardSkeleton } from '../components/common/LoadingSkeleton';
 import { GraduationCap } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 export const CoursesPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,8 +17,10 @@ export const CoursesPage: React.FC = () => {
   const searchParam = searchParams.get('search') || '';
 
   const [courses, setCourses] = useState<Course[]>([]);
+  const [studentEnrollments, setStudentEnrollments] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
+  const { student } = useAuth();
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -28,6 +31,11 @@ export const CoursesPage: React.FC = () => {
         search: searchParam,
       });
       setCourses(data);
+
+      if (student?.student_id) {
+        const enrollments = await ApiService.getStudentCourseEnrollments(student.student_id);
+        setStudentEnrollments(enrollments.map(e => e.course_id));
+      }
     } catch (err) {
       console.error('Error fetching courses:', err);
       setError(true);
@@ -38,7 +46,7 @@ export const CoursesPage: React.FC = () => {
 
   useEffect(() => {
     fetchCourses();
-  }, [categoryParam, searchParam]);
+  }, [categoryParam, searchParam, student?.student_id]);
 
   const updateFilters = (newCategory?: string, newSearch?: string) => {
     const params = new URLSearchParams(searchParams);
@@ -106,7 +114,11 @@ export const CoursesPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
-            <CourseCard key={course.course_id} course={course} />
+            <CourseCard 
+              key={course.course_id} 
+              course={course} 
+              isEnrolled={studentEnrollments.includes(course.course_id)}
+            />
           ))}
         </div>
       )}

@@ -1,4 +1,4 @@
-# CareerPath - Student Career & Project Platform
+# GoTechPlace - Student Career & Project Platform
 
 Production-quality MVP web application for college students aged 18–25, featuring student registration/profile management, personalized student dashboard, branch-wise Minor/Major project marketplace, project booking flow, job & internship opportunities, and isolated Google Sheets database backend via Netlify Serverless Functions.
 
@@ -6,7 +6,7 @@ Production-quality MVP web application for college students aged 18–25, featur
 
 ## 1. Product Overview
 
-CareerPath brings together:
+GoTechPlace brings together:
 - **Welcome & Identity Verification**: Google Sign-In identity authentication.
 - **Multi-step Registration**: Captures student personal and academic details (College, Branch, Year, Semester).
 - **Personalized Student Dashboard**: Displays profile completion status, quick action cards, recommended projects, and tailored job opportunities.

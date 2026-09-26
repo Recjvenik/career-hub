@@ -19,7 +19,7 @@ export function validateRegistrationForm(data: {
     errors.name = 'Please enter a valid full name.';
   }
 
-  const phoneRegex = /^[6-9]\d{9}$/;
+  const phoneRegex = /^\d{10}$/;
   const cleanMobile = data.mobile ? data.mobile.replace(/[\s\-\+\(\)]/g, '') : '';
   if (!cleanMobile || !phoneRegex.test(cleanMobile)) {
     errors.mobile = 'Please enter a valid 10-digit mobile number.';

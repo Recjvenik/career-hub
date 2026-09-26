@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
@@ -10,52 +9,39 @@ import { ShieldCheck, CheckCircle2, Lock } from 'lucide-react';
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setGoogleAuthUser, loginWithGoogleMock, loading } = useAuth();
+  const { signInWithGoogle, loginWithGoogleMock, loading } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  const realGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setIsSigningIn(true);
-      try {
-        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const profile = await res.json();
-        const realUser = {
-          google_id: profile.sub,
-          email: profile.email,
-          name: profile.name,
-          picture: profile.picture,
-        };
-        const existingStudent = await setGoogleAuthUser(realUser);
-        if (existingStudent) {
-          navigate((location.state as any)?.from?.pathname || '/dashboard', { replace: true });
-        } else {
-          navigate('/register', { replace: true });
-        }
-      } catch (err) {
-        console.error('Google Userinfo Fetch Failed:', err);
-      } finally {
-        setIsSigningIn(false);
-      }
-    },
-    onError: (err) => {
-      console.error('Google Sign In Error:', err);
-    },
-  });
+  const handleMainSignIn = async () => {
+    setIsSigningIn(true);
+    try {
+      const hasFirebaseConfig = Boolean(import.meta.env.VITE_FIREBASE_API_KEY);
+      let existingStudent;
 
-  const handleMainSignIn = () => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (clientId && !clientId.includes('placeholder')) {
-      realGoogleLogin();
-    } else {
-      handleDemoSignIn('existing');
+      if (hasFirebaseConfig) {
+        // Real Firebase Google Sign-In popup
+        existingStudent = await signInWithGoogle();
+      } else {
+        // Dev fallback: mock existing user
+        existingStudent = await loginWithGoogleMock();
+      }
+
+      if (existingStudent) {
+        navigate((location.state as any)?.from?.pathname || '/dashboard', { replace: true });
+      } else {
+        navigate('/register', { replace: true });
+      }
+    } catch (err) {
+      console.error('Sign-in failed:', err);
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
   const handleDemoSignIn = async (userPreset?: 'new' | 'existing') => {
     setIsSigningIn(true);
     try {
+      let existingStudent;
       if (userPreset === 'new') {
         const newGoogleUser = {
           google_id: `google-new-${Date.now()}`,
@@ -63,19 +49,15 @@ export const LoginPage: React.FC = () => {
           name: 'Aarav Mehta',
           picture: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80',
         };
-        const existingStudent = await loginWithGoogleMock(newGoogleUser);
-        if (existingStudent) {
-          navigate('/dashboard', { replace: true });
-        } else {
-          navigate('/register', { replace: true });
-        }
+        existingStudent = await loginWithGoogleMock(newGoogleUser);
       } else {
-        const existingStudent = await loginWithGoogleMock();
-        if (existingStudent) {
-          navigate('/dashboard', { replace: true });
-        } else {
-          navigate('/register', { replace: true });
-        }
+        existingStudent = await loginWithGoogleMock();
+      }
+
+      if (existingStudent) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/register', { replace: true });
       }
     } catch (err) {
       console.error('Sign-in failed:', err);

@@ -10,9 +10,10 @@ import { useNavigate } from 'react-router-dom';
 export interface ProjectCardProps {
   project: Project;
   onBookClick?: (project: Project) => void;
+  isBooked?: boolean;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+export const ProjectCard: React.FC<ProjectCardProps> = ({ project, isBooked }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -75,16 +76,19 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           </div>
 
           <Button
-            variant="outline"
+            variant={isBooked ? 'outline' : 'outline'}
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/projects/${project.project_id}`);
             }}
-            icon={<ArrowRight className="w-3.5 h-3.5" />}
-            className="group-hover:bg-brand-600 group-hover:text-white group-hover:border-brand-600 transition-colors"
+            icon={!isBooked && <ArrowRight className="w-3.5 h-3.5" />}
+            className={isBooked 
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-bold" 
+              : "group-hover:bg-brand-600 group-hover:text-white group-hover:border-brand-600 transition-colors"
+            }
           >
-            View Project
+            {isBooked ? 'Already Booked' : 'View Project'}
           </Button>
         </div>
       </div>

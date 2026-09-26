@@ -44,7 +44,7 @@ export const RegistrationPage: React.FC = () => {
     // Basic validation for Step 1
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = 'Name is required.';
-    if (!formData.mobile || !/^[6-9]\d{9}$/.test(formData.mobile.replace(/\s+/g, ''))) {
+    if (!formData.mobile || !/^\d{10}$/.test(formData.mobile.replace(/\s+/g, ''))) {
       newErrors.mobile = 'Enter a valid 10-digit mobile number.';
     }
     if (!formData.location.trim()) newErrors.location = 'Location is required.';
@@ -153,7 +153,10 @@ export const RegistrationPage: React.FC = () => {
                 label="Mobile Number"
                 type="tel"
                 value={formData.mobile}
-                onChange={(e) => handleChange('mobile', e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  handleChange('mobile', val);
+                }}
                 error={errors.mobile}
                 placeholder="10-digit mobile number (e.g. 9876543210)"
               />

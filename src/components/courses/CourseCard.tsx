@@ -9,9 +9,10 @@ import { useNavigate } from 'react-router-dom';
 
 export interface CourseCardProps {
   course: Course;
+  isEnrolled?: boolean;
 }
 
-export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+export const CourseCard: React.FC<CourseCardProps> = ({ course, isEnrolled }) => {
   const navigate = useNavigate();
 
   return (
@@ -83,16 +84,19 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
           </div>
 
           <Button
-            variant="outline"
+            variant={isEnrolled ? 'outline' : 'outline'}
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/courses/${course.course_id}`);
             }}
-            icon={<ArrowRight className="w-3.5 h-3.5" />}
-            className="group-hover:bg-brand-600 group-hover:text-white group-hover:border-brand-600 transition-colors"
+            icon={!isEnrolled && <ArrowRight className="w-3.5 h-3.5" />}
+            className={isEnrolled 
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-bold" 
+              : "group-hover:bg-brand-600 group-hover:text-white group-hover:border-brand-600 transition-colors"
+            }
           >
-            View Course
+            {isEnrolled ? 'Enrolled' : 'View Course'}
           </Button>
         </div>
       </div>
