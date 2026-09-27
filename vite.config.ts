@@ -27,4 +27,15 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          'lucide-icons': ['lucide-react'],
+        },
+      },
+    },
+  },
 });
