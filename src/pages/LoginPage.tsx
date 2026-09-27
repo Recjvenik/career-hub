@@ -114,48 +114,10 @@ export const LoginPage: React.FC = () => {
               Sign in with Google
             </Button>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-3 text-gray-400 font-medium">Demo Quick Sign-In</span>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoSignIn('existing')}
-                disabled={isSigningIn || loading}
-                className="text-xs"
-              >
-                Existing Student
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoSignIn('new')}
-                disabled={isSigningIn || loading}
-                className="text-xs"
-              >
-                New Student Register
-              </Button>
-            </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-2.5 text-xs text-gray-500">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Identity verified safely via Google OAuth</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-brand-600 shrink-0" />
-              <span>No password storage required</span>
-            </div>
-          </div>
+
         </Card>
       </div>
     </div>

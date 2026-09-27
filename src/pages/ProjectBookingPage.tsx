@@ -187,7 +187,7 @@ export const ProjectBookingPage: React.FC = () => {
           <div className="mt-2 flex flex-wrap items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-200">
             <span>Branch: <strong>{project.branch}</strong></span>
             <span>Duration: <strong>{project.duration}</strong></span>
-            <span>Cost: <strong className="text-brand-700 text-sm">{formatCurrency(project.cost)}</strong></span>
+            <span>Cost: <strong className="text-brand-700 text-sm">{formatCurrency(project.discounted_cost)}</strong></span>
           </div>
         </div>
       </Card>
@@ -226,7 +226,7 @@ export const ProjectBookingPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
         <div>
           <span className="text-xs font-semibold text-gray-500 block">Total Amount Due</span>
-          <span className="text-2xl font-extrabold text-brand-700">{formatCurrency(project.cost)}</span>
+          <span className="text-2xl font-extrabold text-brand-700">{formatCurrency(project.discounted_cost)}</span>
         </div>
 
         <Button

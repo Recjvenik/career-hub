@@ -2,6 +2,12 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
 import { ProtectedRoute } from '../components/layout/ProtectedRoute';
+import { AdminProtectedRoute } from '../components/layout/AdminProtectedRoute';
+import { AdminLayout } from '../layouts/AdminLayout';
+import { AdminDashboard } from '../pages/admin/AdminDashboard';
+import { AdminProjects } from '../pages/admin/AdminProjects';
+import { AdminJobs } from '../pages/admin/AdminJobs';
+import { AdminCourses } from '../pages/admin/AdminCourses';
 
 // Lazy load pages for better performance (LCP/FCP)
 const HomePage = lazy(() => import('../pages/HomePage').then(module => ({ default: module.HomePage })));
@@ -76,6 +82,21 @@ export const AppRoutes: React.FC = () => {
               </ProtectedRoute>
             }
           />
+
+          {/* Admin CMS Routes */}
+          <Route
+            path="/admin"
+            element={
+              <AdminProtectedRoute>
+                <AdminLayout />
+              </AdminProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="projects" element={<AdminProjects />} />
+            <Route path="jobs" element={<AdminJobs />} />
+            <Route path="courses" element={<AdminCourses />} />
+          </Route>
 
           {/* Fallback 404 Route */}
           <Route path="*" element={<Navigate to="/" replace />} />

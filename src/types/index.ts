@@ -46,7 +46,8 @@ export interface Project {
   technologies: string[];
   difficulty: Difficulty;
   duration: string;
-  cost: number;
+  original_cost: number;
+  discounted_cost: number;
   availability: Availability;
   capacity: number;
   image?: string;

@@ -137,6 +137,73 @@ export const FirestoreService = {
   // -------------------------------------------------------------------------
   // Projects
   // -------------------------------------------------------------------------
+  createProject: async (projectData: Partial<Project>): Promise<Project> => {
+    const projectRef = collection(db, 'projects');
+    const newDoc = await addDoc(projectRef, {
+      title: projectData.title ?? '',
+      description: projectData.description ?? '',
+      branch: projectData.branch ?? '',
+      projectType: projectData.project_type ?? 'Minor',
+      technologies: projectData.technologies ?? [],
+      difficulty: projectData.difficulty ?? 'Intermediate',
+      duration: projectData.duration ?? '',
+      originalCost: projectData.original_cost ?? 0,
+      discountedCost: projectData.discounted_cost ?? 0,
+      availability: projectData.availability ?? 'Available',
+      capacity: projectData.capacity ?? 0,
+      imageUrl: projectData.image ?? '',
+      isActive: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    
+    const snap = await getDoc(newDoc);
+    const data = snap.data()!;
+    return {
+      project_id: newDoc.id,
+      title: data.title,
+      description: data.description,
+      branch: data.branch,
+      project_type: data.projectType,
+      technologies: data.technologies,
+      difficulty: data.difficulty,
+      duration: data.duration,
+      original_cost: data.originalCost,
+      discounted_cost: data.discountedCost,
+      availability: data.availability,
+      capacity: data.capacity,
+      image: data.imageUrl,
+      created_at: tsToStr(data.createdAt),
+      updated_at: tsToStr(data.updatedAt),
+    } as Project;
+  },
+
+  updateProject: async (projectId: string, projectData: Partial<Project>): Promise<void> => {
+    const projectRef = doc(db, 'projects', projectId);
+    const updatePayload: Record<string, any> = { updatedAt: serverTimestamp() };
+    
+    if (projectData.title !== undefined) updatePayload.title = projectData.title;
+    if (projectData.description !== undefined) updatePayload.description = projectData.description;
+    if (projectData.branch !== undefined) updatePayload.branch = projectData.branch;
+    if (projectData.project_type !== undefined) updatePayload.projectType = projectData.project_type;
+    if (projectData.technologies !== undefined) updatePayload.technologies = projectData.technologies;
+    if (projectData.difficulty !== undefined) updatePayload.difficulty = projectData.difficulty;
+    if (projectData.duration !== undefined) updatePayload.duration = projectData.duration;
+    if (projectData.original_cost !== undefined) updatePayload.originalCost = projectData.original_cost;
+    if (projectData.discounted_cost !== undefined) updatePayload.discountedCost = projectData.discounted_cost;
+    if (projectData.availability !== undefined) updatePayload.availability = projectData.availability;
+    if (projectData.capacity !== undefined) updatePayload.capacity = projectData.capacity;
+    if (projectData.image !== undefined) updatePayload.imageUrl = projectData.image;
+
+    await updateDoc(projectRef, updatePayload);
+  },
+
+  deleteProject: async (projectId: string): Promise<void> => {
+    // Soft delete
+    const projectRef = doc(db, 'projects', projectId);
+    await updateDoc(projectRef, { isActive: false, updatedAt: serverTimestamp() });
+  },
+
   getProjects: async (filters?: { branch?: string; type?: string; search?: string }): Promise<Project[]> => {
     try {
       const constraints: QueryConstraint[] = [where('isActive', '==', true)];
@@ -162,7 +229,8 @@ export const FirestoreService = {
           technologies: data.technologies ?? [],
           difficulty: data.difficulty ?? 'Intermediate',
           duration: data.duration ?? '',
-          cost: data.cost ?? 0,
+          original_cost: data.originalCost ?? (data.cost ? data.cost * 2.5 : 0),
+          discounted_cost: data.discountedCost ?? (data.cost ? data.cost * 2.5 * 0.8 : 0),
           availability: data.availability ?? 'Available',
           capacity: data.capacity ?? 0,
           image: data.imageUrl ?? '',
@@ -203,7 +271,8 @@ export const FirestoreService = {
         technologies: data.technologies ?? [],
         difficulty: data.difficulty ?? 'Intermediate',
         duration: data.duration ?? '',
-        cost: data.cost ?? 0,
+        original_cost: data.originalCost ?? (data.cost ? data.cost * 2.5 : 0),
+        discounted_cost: data.discountedCost ?? (data.cost ? data.cost * 2.5 * 0.8 : 0),
         availability: data.availability ?? 'Available',
         capacity: data.capacity ?? 0,
         image: data.imageUrl ?? '',
@@ -247,7 +316,7 @@ export const FirestoreService = {
       projectTitle: project?.title ?? '',
       projectBranch: project?.branch ?? '',
       projectType: project?.project_type ?? '',
-      projectCost: project?.cost ?? 0,
+      projectCost: project?.discounted_cost ?? 0,
       status: 'PENDING',
       bookedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -293,6 +362,70 @@ export const FirestoreService = {
   // -------------------------------------------------------------------------
   // Jobs
   // -------------------------------------------------------------------------
+  createJob: async (jobData: Partial<Job>): Promise<Job> => {
+    const jobRef = collection(db, 'jobs');
+    const newDoc = await addDoc(jobRef, {
+      company: jobData.company ?? '',
+      role: jobData.role ?? '',
+      jobType: jobData.job_type ?? 'Internship',
+      description: jobData.description ?? '',
+      eligibilityBranches: jobData.eligibility ? jobData.eligibility.split('·').map(s => s.trim()) : [],
+      location: jobData.location ?? '',
+      skills: jobData.skills ?? [],
+      experience: jobData.experience ?? 'Fresher',
+      deadline: jobData.deadline ? new Date(jobData.deadline) : null,
+      applyUrl: jobData.apply_url ?? '#',
+      companyLogo: jobData.company_logo ?? '',
+      isActive: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    
+    const snap = await getDoc(newDoc);
+    const data = snap.data()!;
+    return {
+      job_id: newDoc.id,
+      company: data.company,
+      role: data.role,
+      job_type: data.jobType,
+      description: data.description,
+      eligibility: (data.eligibilityBranches ?? []).join(' · '),
+      location: data.location,
+      skills: data.skills,
+      experience: data.experience,
+      deadline: data.deadline ? data.deadline.toDate().toISOString().split('T')[0] : '',
+      apply_url: data.applyUrl,
+      company_logo: data.companyLogo,
+      created_at: tsToStr(data.createdAt),
+      updated_at: tsToStr(data.updatedAt),
+    } as Job;
+  },
+
+  updateJob: async (jobId: string, jobData: Partial<Job>): Promise<void> => {
+    const jobRef = doc(db, 'jobs', jobId);
+    const updatePayload: Record<string, any> = { updatedAt: serverTimestamp() };
+    
+    if (jobData.company !== undefined) updatePayload.company = jobData.company;
+    if (jobData.role !== undefined) updatePayload.role = jobData.role;
+    if (jobData.job_type !== undefined) updatePayload.jobType = jobData.job_type;
+    if (jobData.description !== undefined) updatePayload.description = jobData.description;
+    if (jobData.eligibility !== undefined) updatePayload.eligibilityBranches = jobData.eligibility.split('·').map(s => s.trim());
+    if (jobData.location !== undefined) updatePayload.location = jobData.location;
+    if (jobData.skills !== undefined) updatePayload.skills = jobData.skills;
+    if (jobData.experience !== undefined) updatePayload.experience = jobData.experience;
+    if (jobData.deadline !== undefined) updatePayload.deadline = jobData.deadline ? new Date(jobData.deadline) : null;
+    if (jobData.apply_url !== undefined) updatePayload.applyUrl = jobData.apply_url;
+    if (jobData.company_logo !== undefined) updatePayload.companyLogo = jobData.company_logo;
+
+    await updateDoc(jobRef, updatePayload);
+  },
+
+  deleteJob: async (jobId: string): Promise<void> => {
+    // Soft delete
+    const jobRef = doc(db, 'jobs', jobId);
+    await updateDoc(jobRef, { isActive: false, updatedAt: serverTimestamp() });
+  },
+
   getJobs: async (filters?: { branch?: string; job_type?: string; search?: string }): Promise<Job[]> => {
     try {
       const constraints: QueryConstraint[] = [where('isActive', '==', true)];
@@ -380,6 +513,67 @@ export const FirestoreService = {
   // -------------------------------------------------------------------------
   // Courses
   // -------------------------------------------------------------------------
+  createCourse: async (courseData: Partial<Course>): Promise<Course> => {
+    const courseRef = collection(db, 'courses');
+    const newDoc = await addDoc(courseRef, {
+      title: courseData.title ?? '',
+      focusArea: courseData.focus_area ?? '',
+      studentOutcome: courseData.student_outcome ?? '',
+      description: courseData.description ?? '',
+      technologies: courseData.technologies ?? [],
+      duration: courseData.duration ?? '',
+      level: courseData.level ?? 'Intermediate',
+      category: courseData.category ?? '',
+      cost: courseData.cost ?? 0,
+      instructor: courseData.instructor ?? '',
+      isActive: true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    
+    const snap = await getDoc(newDoc);
+    const data = snap.data()!;
+    return {
+      course_id: newDoc.id,
+      title: data.title,
+      focus_area: data.focusArea,
+      student_outcome: data.studentOutcome,
+      description: data.description,
+      technologies: data.technologies,
+      duration: data.duration,
+      level: data.level,
+      category: data.category,
+      cost: data.cost,
+      instructor: data.instructor,
+      created_at: tsToStr(data.createdAt),
+      updated_at: tsToStr(data.updatedAt),
+    } as Course;
+  },
+
+  updateCourse: async (courseId: string, courseData: Partial<Course>): Promise<void> => {
+    const courseRef = doc(db, 'courses', courseId);
+    const updatePayload: Record<string, any> = { updatedAt: serverTimestamp() };
+    
+    if (courseData.title !== undefined) updatePayload.title = courseData.title;
+    if (courseData.focus_area !== undefined) updatePayload.focusArea = courseData.focus_area;
+    if (courseData.student_outcome !== undefined) updatePayload.studentOutcome = courseData.student_outcome;
+    if (courseData.description !== undefined) updatePayload.description = courseData.description;
+    if (courseData.technologies !== undefined) updatePayload.technologies = courseData.technologies;
+    if (courseData.duration !== undefined) updatePayload.duration = courseData.duration;
+    if (courseData.level !== undefined) updatePayload.level = courseData.level;
+    if (courseData.category !== undefined) updatePayload.category = courseData.category;
+    if (courseData.cost !== undefined) updatePayload.cost = courseData.cost;
+    if (courseData.instructor !== undefined) updatePayload.instructor = courseData.instructor;
+
+    await updateDoc(courseRef, updatePayload);
+  },
+
+  deleteCourse: async (courseId: string): Promise<void> => {
+    // Soft delete
+    const courseRef = doc(db, 'courses', courseId);
+    await updateDoc(courseRef, { isActive: false, updatedAt: serverTimestamp() });
+  },
+
   getCourses: async (filters?: { category?: string; search?: string }): Promise<Course[]> => {
     try {
       const constraints: QueryConstraint[] = [where('isActive', '==', true)];

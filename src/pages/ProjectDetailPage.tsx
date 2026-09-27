@@ -62,6 +62,9 @@ export const ProjectDetailPage: React.FC = () => {
     );
   }
 
+  const originalPrice = project.original_cost || 0;
+  const discountedPrice = project.discounted_cost || 0;
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
       {/* Back Button */}
@@ -174,10 +177,18 @@ export const ProjectDetailPage: React.FC = () => {
         {/* Pricing & Booking Action Card */}
         <Card className="p-6 flex flex-col justify-between border-brand-200 bg-brand-50/20 shadow-md">
           <div className="flex flex-col gap-4">
-            <div className="border-b border-brand-100 pb-4">
+            <div className="border-b border-brand-100 pb-4 relative">
+              <div className="absolute -top-3 right-0 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm z-10 flex items-center gap-1">
+                <span className="animate-pulse w-1.5 h-1.5 bg-white rounded-full"></span> LIMITED TIME OFFER
+              </div>
               <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Listed Price</span>
-              <div className="text-3xl font-extrabold text-brand-700 mt-1">
-                {formatCurrency(project.cost)}
+              <div className="flex items-end gap-3 mt-1">
+                <div className="text-3xl font-extrabold text-emerald-600">
+                  {formatCurrency(discountedPrice)}
+                </div>
+                <div className="text-lg font-semibold text-gray-400 line-through mb-1">
+                  {formatCurrency(originalPrice)}
+                </div>
               </div>
               <span className="text-[11px] text-gray-500 mt-0.5 block">Includes components & documentation</span>
             </div>

@@ -20,9 +20,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, isBooked }) =
     navigate(`/projects/${project.project_id}`);
   };
 
+  const originalPrice = project.original_cost || 0;
+  const discountedPrice = project.discounted_cost || 0;
+
   return (
-    <Card hoverable onClick={handleCardClick} className="flex flex-col justify-between h-full group">
-      <div>
+    <Card hoverable onClick={handleCardClick} className="flex flex-col justify-between h-full group relative overflow-hidden">
+      <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm z-10 flex items-center gap-1">
+        <span className="animate-pulse w-1.5 h-1.5 bg-white rounded-full"></span> LIMITED TIME OFFER
+      </div>
+      <div className="pt-2">
         {/* Badges Bar */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <Badge variant={project.project_type === 'Major' ? 'brand' : 'accent'} size="sm">
@@ -72,7 +78,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, isBooked }) =
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block">Estimated Cost</span>
-            <span className="text-lg font-extrabold text-brand-700">{formatCurrency(project.cost)}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-gray-400 line-through">{formatCurrency(originalPrice)}</span>
+              <span className="text-lg font-extrabold text-emerald-600">{formatCurrency(discountedPrice)}</span>
+            </div>
           </div>
 
           <Button
