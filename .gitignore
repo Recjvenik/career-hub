@@ -34,3 +34,4 @@ dist-ssr/
 
 # Firebase Admin SDK Service Account Key — NEVER COMMIT THIS
 scripts/serviceAccountKey.json
+Projects.pdf

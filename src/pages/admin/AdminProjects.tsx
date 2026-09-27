@@ -3,9 +3,11 @@ import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Select } from '../../components/common/Select';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../lib/firebase';
 import { FirestoreService } from '../../services/firestore';
 import { Project } from '../../types';
-import { Plus, Edit2, Trash2, X, Calculator } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Calculator, Image as ImageIcon } from 'lucide-react';
 import { BRANCHES } from '../../utils/constants';
 
 export const AdminProjects: React.FC = () => {
@@ -13,6 +15,8 @@ export const AdminProjects: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<Partial<Project>>({
@@ -71,12 +75,14 @@ export const AdminProjects: React.FC = () => {
       setMarkupPercent(150);
       setDiscountPercent(20);
     }
+    setImageFile(null);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingProject(null);
+    setImageFile(null);
   };
 
   const calculatePrices = () => {
@@ -93,17 +99,30 @@ export const AdminProjects: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(true);
     try {
+      let imageUrl = formData.image;
+
+      if (imageFile) {
+        const storageRef = ref(storage, `projects/${Date.now()}-${imageFile.name}`);
+        const snapshot = await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+
+      const finalData = { ...formData, image: imageUrl };
+
       if (editingProject) {
-        await FirestoreService.updateProject(editingProject.project_id, formData);
+        await FirestoreService.updateProject(editingProject.project_id, finalData);
       } else {
-        await FirestoreService.createProject(formData);
+        await FirestoreService.createProject(finalData);
       }
       handleCloseModal();
       fetchProjects();
     } catch (err) {
       console.error("Error saving project", err);
       alert("Failed to save project.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -234,6 +253,36 @@ export const AdminProjects: React.FC = () => {
                 </div>
 
                 <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">Project Image</label>
+                  <div className="flex items-center gap-4">
+                    {formData.image && !imageFile && (
+                      <img src={formData.image} alt="Preview" className="w-16 h-16 rounded-xl object-cover border border-gray-200 shadow-sm" />
+                    )}
+                    {imageFile && (
+                      <div className="w-16 h-16 rounded-xl bg-brand-50 border border-brand-200 flex flex-col items-center justify-center text-[10px] text-brand-700 font-bold p-1 overflow-hidden shadow-sm">
+                        <ImageIcon className="w-4 h-4 mb-1" />
+                        Selected
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setImageFile(e.target.files[0]);
+                        }
+                      }}
+                      className="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-brand-50 file:text-brand-700
+                        hover:file:bg-brand-100 transition-all cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">Description</label>
                   <textarea
                     className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-sm resize-none"
@@ -303,9 +352,9 @@ export const AdminProjects: React.FC = () => {
             </div>
 
             <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
-              <Button variant="ghost" onClick={handleCloseModal}>Cancel</Button>
-              <Button variant="primary" type="submit" form="project-form">
-                {editingProject ? 'Update Project' : 'Create Project'}
+              <Button variant="ghost" onClick={handleCloseModal} disabled={uploading}>Cancel</Button>
+              <Button variant="primary" type="submit" form="project-form" disabled={uploading}>
+                {uploading ? 'Saving...' : editingProject ? 'Update Project' : 'Create Project'}
               </Button>
             </div>
           </div>

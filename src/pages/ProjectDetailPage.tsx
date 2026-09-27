@@ -1,12 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ApiService } from '../services/api';
-import { Project } from '../types';
-import { Button } from '../components/common/Button';
-import { Badge } from '../components/common/Badge';
-import { Card } from '../components/common/Card';
-import { formatCurrency } from '../utils/formatters';
-import { ArrowLeft, Clock, Cpu, ShieldCheck, CheckCircle2, AlertCircle, BookmarkPlus } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { ApiService } from "../services/api";
+import { Project } from "../types";
+import { Button } from "../components/common/Button";
+import { Badge } from "../components/common/Badge";
+import { Card } from "../components/common/Card";
+import { formatCurrency } from "../utils/formatters";
+import {
+  ArrowLeft,
+  Clock,
+  Cpu,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  BookmarkPlus,
+  Image as ImageIcon,
+  X,
+} from "lucide-react";
 
 export const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +24,7 @@ export const ProjectDetailPage: React.FC = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [notFound, setNotFound] = useState<boolean>(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const loadProject = async () => {
@@ -28,7 +39,7 @@ export const ProjectDetailPage: React.FC = () => {
           setNotFound(true);
         }
       } catch (err) {
-        console.error('Error fetching project detail:', err);
+        console.error("Error fetching project detail:", err);
         setNotFound(true);
       } finally {
         setLoading(false);
@@ -54,8 +65,11 @@ export const ProjectDetailPage: React.FC = () => {
           <AlertCircle className="w-6 h-6" />
         </div>
         <h2 className="text-xl font-bold text-gray-900">Project Not Found</h2>
-        <p className="text-sm text-gray-500">The requested academic project does not exist or may have been removed.</p>
-        <Button variant="primary" onClick={() => navigate('/projects')}>
+        <p className="text-sm text-gray-500">
+          The requested academic project does not exist or may have been
+          removed.
+        </p>
+        <Button variant="primary" onClick={() => navigate("/projects")}>
           Back to Projects Marketplace
         </Button>
       </div>
@@ -77,37 +91,48 @@ export const ProjectDetailPage: React.FC = () => {
       </Link>
 
       {/* Hero Header Card */}
-      <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-950 text-white rounded-3xl p-6 sm:p-10 shadow-md flex flex-col gap-6 relative overflow-hidden">
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge variant={project.project_type === 'Major' ? 'brand' : 'accent'} size="sm" className="bg-white/15 text-white border-white/20">
-            {project.project_type} Project
-          </Badge>
-          <span className="text-xs font-semibold bg-white/10 text-brand-200 px-3 py-1 rounded-pill">
-            {project.branch}
-          </span>
-          <span className="text-xs font-semibold bg-emerald-500/20 text-emerald-200 px-3 py-1 rounded-pill border border-emerald-500/30 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            {project.availability}
-          </span>
-        </div>
-
-        <div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
-            {project.title}
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-brand-100 leading-relaxed max-w-3xl">
-            {project.description}
-          </p>
-        </div>
-
-        {/* Tech Stack Chips */}
-        <div className="flex flex-wrap items-center gap-2 pt-2">
-          <span className="text-xs font-semibold text-brand-300 uppercase tracking-wider mr-2">Components & Tech:</span>
-          {project.technologies.map((tech) => (
-            <span key={tech} className="text-xs font-semibold bg-white/10 text-white px-3 py-1 rounded-lg border border-white/10">
-              {tech}
+      <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-950 text-white rounded-3xl p-6 sm:p-10 shadow-md flex flex-col md:flex-row gap-8 relative overflow-hidden items-center">
+        <div className="flex-1 flex flex-col gap-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge
+              variant={project.project_type === "Major" ? "brand" : "accent"}
+              size="sm"
+              className="bg-white/15 text-white border-white/20"
+            >
+              {project.project_type} Project
+            </Badge>
+            <span className="text-xs font-semibold bg-white/10 text-brand-200 px-3 py-1 rounded-pill">
+              {project.branch}
             </span>
-          ))}
+            <span className="text-xs font-semibold bg-emerald-500/20 text-emerald-200 px-3 py-1 rounded-pill border border-emerald-500/30 flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {project.availability}
+            </span>
+          </div>
+
+          <div>
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+              {project.title}
+            </h1>
+            <p className="mt-3 text-sm sm:text-base text-brand-100 leading-relaxed max-w-3xl">
+              {project.description}
+            </p>
+          </div>
+
+          {/* Tech Stack Chips */}
+          <div className="flex flex-wrap items-center gap-2 pt-2">
+            <span className="text-xs font-semibold text-brand-300 uppercase tracking-wider mr-2">
+              Components & Tech:
+            </span>
+            {project.technologies.map((tech) => (
+              <span
+                key={tech}
+                className="text-xs font-semibold bg-white/10 text-white px-3 py-1 rounded-lg border border-white/10"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -121,46 +146,76 @@ export const ProjectDetailPage: React.FC = () => {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Branch</span>
-              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">{project.branch}</span>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                Branch
+              </span>
+              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">
+                {project.branch}
+              </span>
             </div>
 
             <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Category</span>
-              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">{project.project_type}</span>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                Category
+              </span>
+              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">
+                {project.project_type}
+              </span>
             </div>
 
             <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Duration</span>
-              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">{project.duration}</span>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                Duration
+              </span>
+              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">
+                {project.duration}
+              </span>
             </div>
 
             <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Difficulty</span>
-              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">{project.difficulty}</span>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                Difficulty
+              </span>
+              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">
+                {project.difficulty}
+              </span>
             </div>
 
             <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Capacity</span>
-              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">{project.capacity} Teams</span>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                Capacity
+              </span>
+              <span className="text-sm font-extrabold text-gray-800 mt-0.5 block">
+                {project.capacity} Teams
+              </span>
             </div>
 
             <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Status</span>
-              <span className="text-sm font-extrabold text-emerald-600 mt-0.5 block">{project.availability}</span>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                Status
+              </span>
+              <span className="text-sm font-extrabold text-emerald-600 mt-0.5 block">
+                {project.availability}
+              </span>
             </div>
           </div>
 
           <div className="flex flex-col gap-3 pt-4 border-t border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900">What is Included in This Project Package?</h3>
+            <h3 className="text-sm font-bold text-gray-900">
+              What is Included in This Project Package?
+            </h3>
             <ul className="text-xs text-gray-600 flex flex-col gap-2">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Complete hardware components kit & microcontroller board</span>
+                <span>
+                  Complete hardware components kit & microcontroller board
+                </span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Source code, circuit schematic diagram & assembly guide</span>
+                <span>
+                  Source code, circuit schematic diagram & assembly guide
+                </span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -172,6 +227,24 @@ export const ProjectDetailPage: React.FC = () => {
               </li>
             </ul>
           </div>
+
+          {project.image && (
+            <div className="flex flex-col gap-4 pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-gray-900">
+                  Hardware Prototype Image
+                </h3>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setIsImageModalOpen(true)}
+                  icon={<ImageIcon className="w-4 h-4" />}
+                >
+                  View Image
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Pricing & Booking Action Card */}
@@ -179,9 +252,12 @@ export const ProjectDetailPage: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div className="border-b border-brand-100 pb-4 relative">
               <div className="absolute -top-3 right-0 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm z-10 flex items-center gap-1">
-                <span className="animate-pulse w-1.5 h-1.5 bg-white rounded-full"></span> LIMITED TIME OFFER
+                <span className="animate-pulse w-1.5 h-1.5 bg-white rounded-full"></span>{" "}
+                LIMITED TIME OFFER
               </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Listed Price</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                Listed Price
+              </span>
               <div className="flex items-end gap-3 mt-1">
                 <div className="text-3xl font-extrabold text-emerald-600">
                   {formatCurrency(discountedPrice)}
@@ -190,17 +266,23 @@ export const ProjectDetailPage: React.FC = () => {
                   {formatCurrency(originalPrice)}
                 </div>
               </div>
-              <span className="text-[11px] text-gray-500 mt-0.5 block">Includes components & documentation</span>
+              <span className="text-[11px] text-gray-500 mt-0.5 block">
+                Includes components & documentation
+              </span>
             </div>
 
             <div className="flex flex-col gap-2.5 text-xs text-gray-600">
               <div className="flex items-center justify-between">
                 <span>Availability:</span>
-                <strong className="text-emerald-700 font-bold">{project.availability}</strong>
+                <strong className="text-emerald-700 font-bold">
+                  {project.availability}
+                </strong>
               </div>
               <div className="flex items-center justify-between">
                 <span>Category:</span>
-                <strong className="text-gray-900">{project.project_type} Project</strong>
+                <strong className="text-gray-900">
+                  {project.project_type} Project
+                </strong>
               </div>
               <div className="flex items-center justify-between">
                 <span>Branch:</span>
@@ -225,6 +307,39 @@ export const ProjectDetailPage: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      {/* Full-Screen Image Modal */}
+      {isImageModalOpen && project.image && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-gray-900/80 backdrop-blur-sm animate-modal"
+          onClick={() => setIsImageModalOpen(false)}
+        >
+          <div 
+            className="relative max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="absolute top-4 right-4 z-10">
+              <button 
+                onClick={() => setIsImageModalOpen(false)}
+                className="p-2 bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-md transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="bg-gray-100 flex-1 overflow-hidden flex items-center justify-center min-h-[300px]">
+              <img 
+                src={project.image} 
+                alt={project.title}
+                className="max-w-full h-auto max-h-[75vh] object-contain"
+              />
+            </div>
+            <div className="p-4 bg-white border-t border-gray-100 text-center">
+              <h3 className="font-bold text-gray-900">{project.title} - Hardware Prototype</h3>
+              <p className="text-xs text-gray-500 mt-1">High resolution preview</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
