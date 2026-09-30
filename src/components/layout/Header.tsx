@@ -189,6 +189,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
                     Dashboard
                   </Link>
 
+                  {(user?.email === 'gotechplace@gmail.com' || student?.role === 'admin') && (
+                    <Link
+                      to="/cms"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-brand-700 hover:bg-brand-100 transition-colors"
+                    >
+                      <Briefcase className="w-4 h-4 text-brand-600" />
+                      CMS Panel
+                    </Link>
+                  )}
+
                   <div className="border-t border-gray-100 my-1"></div>
 
                   <button

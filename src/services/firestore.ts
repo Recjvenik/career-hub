@@ -12,6 +12,7 @@ import {
   Timestamp,
   serverTimestamp,
   QueryConstraint,
+  collectionGroup,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Student, Project, ProjectBooking, Job, Course, CourseEnrollment } from '../types';
@@ -49,6 +50,7 @@ function docToStudent(uid: string, data: Record<string, unknown>): Student {
     year: (profile.year as string) || '1st Year',
     semester: (profile.semester as string) || 'Semester 1',
     profile_image: (data.photoURL as string) || '',
+    role: (data.role as 'admin' | 'user') || 'user',
     created_at: tsToStr(data.createdAt),
     updated_at: tsToStr(data.updatedAt),
   };
@@ -58,6 +60,16 @@ export const FirestoreService = {
   // -------------------------------------------------------------------------
   // Students
   // -------------------------------------------------------------------------
+  getAllUsers: async (): Promise<Student[]> => {
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      return snap.docs.map((d) => docToStudent(d.id, d.data() as Record<string, unknown>));
+    } catch (err) {
+      console.error('Firestore getAllUsers error:', err);
+      return [];
+    }
+  },
+
   getStudentByGoogleId: async (googleId: string): Promise<Student | null> => {
     try {
       const snap = await getDoc(doc(db, 'users', googleId));
@@ -126,12 +138,21 @@ export const FirestoreService = {
         email,
         displayName,
         photoURL,
+        role: 'user',
         profile: null,
         isProfileComplete: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
     }
+  },
+
+  setAdminStatus: async (studentId: string, isAdmin: boolean): Promise<void> => {
+    const userRef = doc(db, 'users', studentId);
+    await updateDoc(userRef, {
+      role: isAdmin ? 'admin' : 'user',
+      updatedAt: serverTimestamp(),
+    });
   },
 
   // -------------------------------------------------------------------------
@@ -355,6 +376,42 @@ export const FirestoreService = {
       );
     } catch (err) {
       console.error('Firestore getBookingsByStudentId error:', err);
+      return [];
+    }
+  },
+
+  getAllBookingsWithStudents: async (): Promise<any[]> => {
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      
+      // Fetch bookings for each user individually to avoid requiring a Collection Group Index
+      const allBookingsPromises = usersSnap.docs.map(async (userDoc) => {
+        const student = docToStudent(userDoc.id, userDoc.data());
+        const bookingsRef = collection(db, 'users', userDoc.id, 'bookings');
+        const bookingsSnap = await getDocs(bookingsRef);
+        
+        return bookingsSnap.docs.map(d => {
+          const data = d.data();
+          return {
+            booking_id: d.id,
+            student_id: userDoc.id,
+            student_name: student?.name || 'Unknown',
+            student_mobile: student?.mobile || 'N/A',
+            project_id: data.projectId,
+            project_title: data.projectTitle,
+            status: data.status,
+            booked_at: tsToStr(data.bookedAt),
+          };
+        });
+      });
+
+      const allBookingsArrays = await Promise.all(allBookingsPromises);
+      // Flatten the array of arrays
+      const flatBookings = allBookingsArrays.flat();
+      
+      return flatBookings.sort((a, b) => new Date(b.booked_at).getTime() - new Date(a.booked_at).getTime());
+    } catch (err) {
+      console.error('Error fetching all bookings:', err);
       return [];
     }
   },
@@ -717,6 +774,65 @@ export const FirestoreService = {
       );
     } catch (err) {
       console.error('Firestore getCourseEnrollmentsByStudentId error:', err);
+      return [];
+    }
+  },
+
+  getAllEnrollmentsWithStudents: async (): Promise<any[]> => {
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      
+      // Fetch enrollments for each user individually to avoid requiring a Collection Group Index
+      const allEnrollmentsPromises = usersSnap.docs.map(async (userDoc) => {
+        const student = docToStudent(userDoc.id, userDoc.data());
+        const enrollmentsRef = collection(db, 'users', userDoc.id, 'enrollments');
+        const enrollmentsSnap = await getDocs(enrollmentsRef);
+        
+        return enrollmentsSnap.docs.map(d => {
+          const data = d.data();
+          return {
+            enrollment_id: d.id,
+            student_id: userDoc.id,
+            student_name: student?.name || 'Unknown',
+            student_mobile: student?.mobile || 'N/A',
+            course_id: data.courseId,
+            course_title: data.courseTitle,
+            status: data.status,
+            enrolled_at: tsToStr(data.enrolledAt),
+          };
+        });
+      });
+
+      const allEnrollmentsArrays = await Promise.all(allEnrollmentsPromises);
+      // Flatten the array of arrays
+      const flatEnrollments = allEnrollmentsArrays.flat();
+
+      return flatEnrollments.sort((a, b) => new Date(b.enrolled_at).getTime() - new Date(a.enrolled_at).getTime());
+    } catch (err) {
+      console.error('Error fetching all enrollments:', err);
+      return [];
+    }
+  },
+
+  getStudentsWithoutBookings: async (): Promise<Student[]> => {
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      
+      const results = await Promise.all(usersSnap.docs.map(async (userDoc) => {
+        const bookingsRef = collection(db, 'users', userDoc.id, 'bookings');
+        const bookingsSnap = await getDocs(bookingsRef);
+        
+        if (bookingsSnap.empty) {
+          return docToStudent(userDoc.id, userDoc.data());
+        }
+        return null;
+      }));
+
+      return results.filter((student): student is Student => student !== null).sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    } catch (err) {
+      console.error('Error fetching students without bookings:', err);
       return [];
     }
   },

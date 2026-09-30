@@ -8,6 +8,8 @@ import { AdminDashboard } from '../pages/admin/AdminDashboard';
 import { AdminProjects } from '../pages/admin/AdminProjects';
 import { AdminJobs } from '../pages/admin/AdminJobs';
 import { AdminCourses } from '../pages/admin/AdminCourses';
+import { AdminStudentData } from '../pages/admin/AdminStudentData';
+import { AdminStaff } from '../pages/admin/AdminStaff';
 
 // Lazy load pages for better performance (LCP/FCP)
 const HomePage = lazy(() => import('../pages/HomePage').then(module => ({ default: module.HomePage })));
@@ -85,7 +87,7 @@ export const AppRoutes: React.FC = () => {
 
           {/* Admin CMS Routes */}
           <Route
-            path="/admin"
+            path="/cms"
             element={
               <AdminProtectedRoute>
                 <AdminLayout />
@@ -93,9 +95,11 @@ export const AppRoutes: React.FC = () => {
             }
           >
             <Route index element={<AdminDashboard />} />
+            <Route path="students" element={<AdminStudentData />} />
             <Route path="projects" element={<AdminProjects />} />
             <Route path="jobs" element={<AdminJobs />} />
             <Route path="courses" element={<AdminCourses />} />
+            <Route path="staff" element={<AdminStaff />} />
           </Route>
 
           {/* Fallback 404 Route */}

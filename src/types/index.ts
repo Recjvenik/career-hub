@@ -33,6 +33,7 @@ export interface Student {
   year: string;
   semester: string;
   profile_image: string;
+  role?: 'admin' | 'user';
   created_at: string;
   updated_at: string;
 }

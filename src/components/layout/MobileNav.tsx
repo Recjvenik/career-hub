@@ -208,6 +208,29 @@ export const MobileNavDrawer: React.FC<MobileNavProps> = ({ isOpen, onClose }) =
                   </div>
                   <ChevronRight className="w-4 h-4 opacity-70" />
                 </Link>
+
+                {(user?.email === 'gotechplace@gmail.com' || student?.role === 'admin') && (
+                  <Link
+                    to="/cms"
+                    onClick={onClose}
+                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${
+                      isActive('/cms')
+                        ? 'bg-brand-600 text-white font-semibold shadow-xs'
+                        : 'text-brand-700 bg-brand-50 hover:bg-brand-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="w-5 h-5 shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold leading-none">CMS Panel</p>
+                        <p className={`text-[10px] mt-1 ${isActive('/cms') ? 'text-brand-100' : 'text-brand-600/70'}`}>
+                          Manage students and platform
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 opacity-70" />
+                  </Link>
+                )}
               </>
             ) : (
               <>

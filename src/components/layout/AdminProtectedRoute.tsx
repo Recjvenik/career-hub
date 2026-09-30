@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 export const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, loading, user } = useAuth();
+  const { isAuthenticated, loading, user, student } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -18,8 +18,11 @@ export const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ c
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Only allow access to the specified admin email
-  if (user?.email !== 'gotechplace@gmail.com') {
+  // Only allow access to the specified admin email or users with the 'admin' role
+  const isSuperAdmin = user?.email === 'gotechplace@gmail.com';
+  const isStaffAdmin = student?.role === 'admin';
+
+  if (!isSuperAdmin && !isStaffAdmin) {
     // If they are logged in but not an admin, redirect them to dashboard
     return <Navigate to="/dashboard" replace />;
   }

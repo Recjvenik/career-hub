@@ -1,33 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { LayoutDashboard, Briefcase, GraduationCap, FolderKanban, LogOut } from 'lucide-react';
+import { LayoutDashboard, Briefcase, GraduationCap, FolderKanban, LogOut, Users, Menu, X } from 'lucide-react';
 
 export const AdminLayout: React.FC = () => {
   const { signOut, user } = useAuth();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { name: 'Projects', path: '/admin/projects', icon: <FolderKanban className="w-5 h-5" /> },
-    { name: 'Jobs', path: '/admin/jobs', icon: <Briefcase className="w-5 h-5" /> },
-    { name: 'Courses', path: '/admin/courses', icon: <GraduationCap className="w-5 h-5" /> },
+    { name: 'Dashboard', path: '/cms', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { name: 'Students & Bookings', path: '/cms/students', icon: <Users className="w-5 h-5" /> },
+    { name: 'Projects', path: '/cms/projects', icon: <FolderKanban className="w-5 h-5" /> },
+    { name: 'Jobs', path: '/cms/jobs', icon: <Briefcase className="w-5 h-5" /> },
+    { name: 'Courses', path: '/cms/courses', icon: <GraduationCap className="w-5 h-5" /> },
+    { name: 'Staff Management', path: '/cms/staff', icon: <Users className="w-5 h-5" /> },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile Menu Backdrop */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-900/50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
-        <div className="h-16 flex items-center px-6 border-b border-gray-200">
-          <span className="text-xl font-extrabold text-brand-700 tracking-tight">Admin Panel</span>
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out
+        md:static md:translate-x-0
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
+          <span className="text-xl font-extrabold text-brand-700 tracking-tight">CMS Panel</span>
+          <button 
+            className="md:hidden text-gray-500 hover:text-gray-900"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(item.path));
+            const isActive = location.pathname === item.path || (item.path !== '/cms' && location.pathname.startsWith(item.path));
             return (
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium text-sm ${
                   isActive 
                     ? 'bg-brand-50 text-brand-700' 
@@ -59,10 +81,16 @@ export const AdminLayout: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden w-full">
         {/* Mobile Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden">
-          <span className="text-lg font-bold text-brand-700">Admin Panel</span>
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 md:hidden shrink-0 gap-4">
+          <button 
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+          <span className="text-lg font-bold text-brand-700">CMS Panel</span>
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-8">
